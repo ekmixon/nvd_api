@@ -13,8 +13,7 @@ def return_data(file):
     # Helper function to load database files into memory
     try:
         with gzip.open(file, 'rb') as datafile:
-            data = json.loads(datafile.read())['CVE_Items']
-            return data
+            return json.loads(datafile.read())['CVE_Items']
     except FileNotFoundError:
         abort(404, message='No such endpoint exists')
 
@@ -27,14 +26,14 @@ class Database:
     def data(self, year, path=''):
 
         # Used to return any or all archived files by year
-        file = path + 'api/dumps/nvdcve-1.1-' + year + '.json.gz'
+        file = f'{path}api/dumps/nvdcve-1.1-{year}.json.gz'
         return return_data(file)
 
 
     def modified(self, path=''):
 
         # Used to return modified archive
-        file = path + 'api/dumps/nvdcve-1.1-modified.json.gz'
+        file = f'{path}api/dumps/nvdcve-1.1-modified.json.gz'
         return return_data(file)
 
 

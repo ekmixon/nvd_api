@@ -27,18 +27,16 @@ def search(*args):
         ''' + '\n')
         quit()
 
-    # Adds CVE ID and description to cves dictionary from results matching CVE-ID queried
     elif len(args) == 2 and args[1].startswith('cve') or args[1].startswith('CVE'):
         cve = args[1]
         res = requests.get(url + cve)
         cves[res.json()['cve']['CVE_data_meta']['ID']] = res.json()['cve']['description']['description_data'][0]['value']
 
-    # Adds CVE ID/s and descriptions/s to cves dictionary from results list if CVEs are found matching criteria
     else:
         date = args[1]
         year = 'year/'
         keyword = ' '.join(args[2:])
-        if date == 'all' or date == 'recent' or date == 'modified':
+        if date in ['all', 'recent', 'modified']:
             year = date
             date = ''
         res = requests.get(url + year + date + '?keyword=' + keyword)
@@ -46,7 +44,7 @@ def search(*args):
             cves[i['cve']['CVE_data_meta']['ID']] = i['cve']['description']['description_data'][0]['value']
 
     # Prints if no results are found and cves dictionary is empty
-    if len(cves) == 0:
+    if not cves:
         print('No results found.')
         quit()
 
@@ -54,10 +52,10 @@ def search(*args):
     for ID, description in cves.items():
         print('\n' + ID)
         print(description + '\n')
-        
+
     # Prints number of results
     if len(cves) > 1:
-        print('Results found:', str(len(cves)))
+        print('Results found:', len(cves))
         print()
 
 
@@ -69,7 +67,7 @@ if __name__ == '__main__':
 
     except (KeyError, TypeError):
         user_in = ' '.join(argv[1:])
-        print('Did not understand your request for: ' + user_in)
+        print(f'Did not understand your request for: {user_in}')
         quit()
 
     except JSONDecodeError:

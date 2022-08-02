@@ -17,12 +17,10 @@ def return_result(set, *args):
 
     # Helper function to return CVE JSON data
     result = []
-    if len(args) == 0:
-        for cve in set():
-            result.append(cve)
+    if not args:
+        result.extend(iter(set()))
     elif len(args) == 1:
-        for cve in set(args[0]):
-            result.append(cve)
+        result.extend(iter(set(args[0])))
     return result
 
 
@@ -31,9 +29,12 @@ def keyword_search(value, result):
     # Helper function to parse results for keyword argument in CVE description
     keyword_results = []
     for cve in result:
-        for description in cve['cve']['description']['description_data']:
-            if value in description['value'].lower():
-                keyword_results.append(cve)
+        keyword_results.extend(
+            cve
+            for description in cve['cve']['description']['description_data']
+            if value in description['value'].lower()
+        )
+
     return keyword_results
 
 
@@ -64,7 +65,7 @@ class CVE(Resource):
             for cve in data(year):
                 if cve['cve']['CVE_data_meta']['ID'] == cve_id:
                     return cve
-        elif int(year) <= 2002:
+        else:
             for cve in data('2002'):
                 if cve['cve']['CVE_data_meta']['ID'] == cve_id:
                     return cve
@@ -87,10 +88,12 @@ class CVE_Year(Resource):
         if int(year) > 2002:
             result = return_result(data, year)
         elif int(year) < 2003:
-            result = []
-            for cve in data('2002'):
-                if cve['cve']['CVE_data_meta']['ID'][4:8] == str(year):
-                    result.append(cve)
+            result = [
+                cve
+                for cve in data('2002')
+                if cve['cve']['CVE_data_meta']['ID'][4:8] == str(year)
+            ]
+
         if args['keyword'] == '':
             return result
         return keyword_search(args['keyword'].lower(), result)
@@ -149,8 +152,7 @@ class CVE_All(Resource):
         result = []
         data = Database().data
         for year in range(2002, 2021):
-            for cve in data(str(year)):
-                result.append(cve)
+            result.extend(iter(data(str(year))))
         if args['keyword'] == '':
             return result
         return keyword_search(args['keyword'].lower(), result)
