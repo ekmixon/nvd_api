@@ -3,6 +3,7 @@ An unofficial, RESTful API for NIST's NVD.
 Copyright (C) 2020  plasticuproject@pm.me
 """
 
+
 import gzip
 import json
 import pathlib
@@ -39,27 +40,27 @@ files = ['https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-modified.json.gz',
 
 
 # Path to dump files
-path = str(pathlib.Path(__file__).parent.absolute()) + '/dumps'
-path2 = str(pathlib.Path(__file__).parent.absolute()) + '/../'
+path = f'{str(pathlib.Path(__file__).parent.absolute())}/dumps'
+path2 = f'{str(pathlib.Path(__file__).parent.absolute())}/../'
 
 def get_meta():
 
     # get time when modified file was last updated
     metaURL = urlopen('https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-modified.meta')
     newMetaTime = metaURL.readlines()[0][17:-2].decode()
-    with open(path + '/modified.meta', 'w') as outfile:
+    with open(f'{path}/modified.meta', 'w') as outfile:
         outfile.write(newMetaTime)
 
 
 def get_dumps():
 
     #look for dump files and retrieve if not found
-    schemaPath = pathlib.Path(__file__).parent.absolute() / ('dumps' + schema[41:])
+    schemaPath = pathlib.Path(__file__).parent.absolute() / f'dumps{schema[41:]}'
     if not schemaPath.is_file():
         urlretrieve(schema, path + schema[41:])
         get_meta()
     for url in files[2:]:
-        urlPath = pathlib.Path(__file__).parent.absolute() / ('dumps' + url[39:])
+        urlPath = pathlib.Path(__file__).parent.absolute() / f'dumps{url[39:]}'
         if not urlPath.is_file():
             urlretrieve(url, path + url[39:])
 
@@ -72,9 +73,9 @@ def update():
 
     recentFile = path + files[1][39:]
     urlretrieve(files[1], recentFile)
-    
+
     # get time when modified file was last updated
-    with open(path + '/modified.meta', 'r') as infile:
+    with open(f'{path}/modified.meta', 'r') as infile:
         metaTime = infile.read()
     modifiedTime = date_parse(metaTime)
 
@@ -84,7 +85,7 @@ def update():
 
     # get new modified update time
     get_meta()
-    
+
     #organize cves by year
     for year in range(2002, 2021):   # Keep up-to-date with current year
         modifiedCves = []
@@ -96,7 +97,7 @@ def update():
                 modifiedCves.append(cve)
 
         # add cves to files
-        if len(modifiedCves) > 0:
+        if modifiedCves:
             for cveID in modifiedCves:
                 cveYear = cveID['cve']['CVE_data_meta']['ID'][4:8]
                 ID = cveID['cve']['CVE_data_meta']['ID']
@@ -114,8 +115,8 @@ def update():
 
             # write cves to data files
             bytesData = json.dumps(contents).encode('utf-8')
-            fileName = '/nvdcve-1.1-' + cveYear + '.json.gz'
-            filePath = pathlib.Path(__file__).parent.absolute() / ('dumps' + fileName)
+            fileName = f'/nvdcve-1.1-{cveYear}.json.gz'
+            filePath = pathlib.Path(__file__).parent.absolute() / f'dumps{fileName}'
             filePath.unlink()
             file = path + fileName
             with gzip.open(file, 'wb') as datafile:
