@@ -4,7 +4,7 @@ certifi==2020.4.5.1
 chardet==3.0.4
 Click==7.0
 coverage==4.5.4
-Flask==1.1.1
+Flask==2.2.5
 Flask-RESTful==0.3.7
 gunicorn==20.0.4
 idna==2.9
